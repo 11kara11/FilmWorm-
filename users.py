@@ -7,4 +7,3 @@ class User(SqlAlchemyBase):
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True)
-    id_films = sqlalchemy.Column(sqlalchemy.String, nullable=True)
