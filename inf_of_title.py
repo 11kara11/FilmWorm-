@@ -26,7 +26,7 @@ buttons_type = ReplyKeyboardMarkup(resize_keyboard=True).row(button_anime, butto
 buttons_type.add(button_serial)
 
 
-class Choose_inf_of_title(StatesGroup):
+class Choose(StatesGroup):
     film_name = State()
     type_industry = State()
 
@@ -47,19 +47,19 @@ async def process_start_command(message: types.Message):
 
 @dp.message_handler(lambda message: '🧠Информация о тайтле🧠' in message.text)
 async def reaction_buttons_f1(message: types.Message):
-    #if message.text == 'Привет':
-        #await message.reply(f'пока(')
-    if message.text == '':
+    # if message.text == 'Привет':
+    # await message.reply(f'пока(')
+    if message.text == '🧠Информация о тайтле🧠':
         await message.reply('Напиши мне отрасль киноиндустрии', reply_markup=buttons_type)
-        await Choose_inf_of_title.type_industry.set()
+        await Choose.type_industry.set()
 
         # full_name, description, year, poster, rating = Films.get_film_information(message)
         # await message.reply('функция в разработке')
-    #if message.text == '🎁тайтл по твоим интересам🎁':
-        #await message.reply('функция в разработке')
+    # if message.text == '🎁тайтл по твоим интересам🎁':
+    # await message.reply('функция в разработке')
 
 
-@dp.message_handler(state=Choose_inf_of_title.type_industry)
+@dp.message_handler(state=Choose.type_industry)
 async def get_type_industry(message: types.Message, state: FSMContext):
     if message.text == 'аниме':
         type_industry = 'anime'
@@ -75,10 +75,10 @@ async def get_type_industry(message: types.Message, state: FSMContext):
         await message.reply(
             'Напиши мне название фильма 🌞. Для большего процента успеха, советую написать максимально правильно🤔',
             reply_markup=ReplyKeyboardRemove())
-        await Choose_inf_of_title.film_name.set()
+        await Choose.film_name.set()
 
 
-@dp.message_handler(state=Choose_inf_of_title.film_name)
+@dp.message_handler(state=Choose.film_name)
 async def get_film_inf(message: types.Message, state: FSMContext):
     await state.update_data(film=message.text)
     await message.answer('Отлично👍, осуществляю поиск')
@@ -113,7 +113,6 @@ async def process_callback_buttonlike(callback_query: types.CallbackQuery):
         user_to_film.film_id = data
         db_sess.add(user_to_film)
         db_sess.commit()
-        db_sess.close()
         print(1)
     await callback_query.answer()
     db_sess.close()

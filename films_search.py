@@ -33,8 +33,30 @@ class Films():
             return (False, False, False, False, False, False)
         return (full_name, description, year, poster, rating, id_film)
 
-        #print(r.json())
+        # print(r.json())
 
-#Films().get_film_information()
-#r = requests.get('https://api.kinopoisk.dev/v1/movie/possible-values-by-field?field=genres.name'+'&token=' + TOKEN_api_kinopoisk)
-#print(r.json())
+    async def get_title_on_param(self, params=None, year=None, country=None):
+        # try:
+        print(year)
+        if year is None:
+            if country is None:
+                self.TITLE = f'/movie?'
+            else:
+                self.TITLE = f'/movie?countries.name={country}'
+        elif country is None:
+            self.TITLE = f'/movie?&year={year}'
+        else:
+            self.TITLE = f'/movie?year={year}&countries.name={country}'
+
+
+        print(params['genres.name'])
+        print(self.URL + self.TITLE + '&page=1&limit=50' + self.TOKEN)
+        r = requests.get(self.URL + self.TITLE + '&page=1&limit=50' + self.TOKEN, params=params)
+        # print(r.json())
+        return r.json()
+        # except Exception:
+        # return 1
+
+# Films().get_film_information()
+# r = requests.get('https://api.kinopoisk.dev/v1/movie/possible-values-by-field?field=genres.name'+'&token=' + TOKEN_api_kinopoisk)
+# print(r.json())
