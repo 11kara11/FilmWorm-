@@ -12,15 +12,12 @@ from usertofilm import UserToFilm
 import db_session
 import requests
 
-Films = Films()
-user = User()
-user_to_film = UserToFilm()
+
 button_information_film = KeyboardButton('🧠Информация о тайтле🧠')
 button_rec_on_param = KeyboardButton('🍿тайтлы по параметрам🍿')
 button_rec_for_user = KeyboardButton('🎁тайтл по твоим интересам🎁')
 buttons = ReplyKeyboardMarkup(resize_keyboard=True).row(button_information_film, button_rec_on_param)
 buttons.add(button_rec_for_user)
-
 
 buttons_genre = [
     KeyboardButton('боевик'),
@@ -135,7 +132,7 @@ async def get_country(message: types.Message, state: FSMContext):
     country = data['country']
     await state.finish()
     try:
-        title_json = await Films.get_title_on_param(params, year, country)
+        title_json = await Films().get_title_on_param(params, year, country)
         full_name = title_json['docs'][0]['name']
         description = title_json['docs'][0]['description']
         year = title_json['docs'][0]['year']
@@ -170,13 +167,16 @@ async def process_callback_buttonlike_param(callback_query: types.CallbackQuery)
     if db_sess.query(UserToFilm).filter(
             UserToFilm.id == callback_query.from_user.id, UserToFilm.film_id == data).count() < 1:
         print('add new title in db')
+        user_to_film = UserToFilm()
         user_to_film.id = callback_query.from_user.id
         user_to_film.film_id = data
         db_sess.add(user_to_film)
         db_sess.commit()
-        db_sess.close()
-    await callback_query.answer()
+        #db_sess.refresh(user_to_film)
+    #db_sess.expunge_all()
     db_sess.close()
+    await callback_query.answer()
+    print('enddddddddddddddddd')
 
 
 @dp.callback_query_handler(lambda callback_query: "next" == callback_query.data)
@@ -195,7 +195,7 @@ async def process_callback_next(callback_query: types.CallbackQuery, state: FSMC
             poster = requests.get(poster_link)
             with open('img.png', 'wb') as photo:
                 photo.write(poster.content)
-            button_like = InlineKeyboardButton('like', callback_data=f'buttonliked_{id_film}')
+            button_like = InlineKeyboardButton('like', callback_data=f'buttonlikedparam_{id_film}')
             button_next = InlineKeyboardButton('next', callback_data='next')
             button_back = InlineKeyboardButton('back', callback_data='back')
             buttons_inline = InlineKeyboardMarkup().add(button_like, button_next, button_back)
@@ -226,7 +226,7 @@ async def process_callback_back(callback_query: types.CallbackQuery, state: FSMC
             poster = requests.get(poster_link)
             with open('img.png', 'wb') as photo:
                 photo.write(poster.content)
-            button_like = InlineKeyboardButton('like', callback_data=f'buttonliked_{id_film}')
+            button_like = InlineKeyboardButton('like', callback_data=f'buttonlikedparam_{id_film}')
             button_next = InlineKeyboardButton('next', callback_data='next')
             button_back = InlineKeyboardButton('back', callback_data='back')
             buttons_inline = InlineKeyboardMarkup().add(button_like, button_next, button_back)
@@ -250,4 +250,3 @@ def register_handler_f2(dp: Dispatcher):
     dp.register_poll_handler(process_callback_buttonlike_param)
     dp.register_poll_handler(process_callback_next)
     dp.register_poll_handler(process_callback_back)
-    print(1)
