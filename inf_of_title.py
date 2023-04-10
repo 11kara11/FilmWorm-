@@ -10,9 +10,6 @@ from users import User
 from usertofilm import UserToFilm
 import db_session
 
-Films = Films()
-user = User()
-user_to_film = UserToFilm()
 button_information_film = KeyboardButton('🧠Информация о тайтле🧠')
 button_rec_on_param = KeyboardButton('🍿тайтлы по параметрам🍿')
 button_rec_for_user = KeyboardButton('🎁тайтл по твоим интересам🎁')
@@ -26,7 +23,7 @@ buttons_type = ReplyKeyboardMarkup(resize_keyboard=True).row(button_anime, butto
 buttons_type.add(button_serial)
 
 
-class Choose_inf_of_title(StatesGroup):
+class Choose(StatesGroup):
     film_name = State()
     type_industry = State()
 
@@ -39,6 +36,7 @@ async def process_start_command(message: types.Message):
                         reply_markup=buttons)
     db_sess = db_session.create_session()
     if db_sess.query(User).filter_by(id=message.from_user.id).count() < 1:
+        user = User()
         user.id = message.from_user.id
         db_sess.add(user)
         db_sess.commit()
@@ -47,19 +45,19 @@ async def process_start_command(message: types.Message):
 
 @dp.message_handler(lambda message: '🧠Информация о тайтле🧠' in message.text)
 async def reaction_buttons_f1(message: types.Message):
-    #if message.text == 'Привет':
-        #await message.reply(f'пока(')
-    if message.text == '':
+    # if message.text == 'Привет':
+    # await message.reply(f'пока(')
+    if message.text == '🧠Информация о тайтле🧠':
         await message.reply('Напиши мне отрасль киноиндустрии', reply_markup=buttons_type)
-        await Choose_inf_of_title.type_industry.set()
+        await Choose.type_industry.set()
 
         # full_name, description, year, poster, rating = Films.get_film_information(message)
         # await message.reply('функция в разработке')
-    #if message.text == '🎁тайтл по твоим интересам🎁':
-        #await message.reply('функция в разработке')
+    # if message.text == '🎁тайтл по твоим интересам🎁':
+    # await message.reply('функция в разработке')
 
 
-@dp.message_handler(state=Choose_inf_of_title.type_industry)
+@dp.message_handler(state=Choose.type_industry)
 async def get_type_industry(message: types.Message, state: FSMContext):
     if message.text == 'аниме':
         type_industry = 'anime'
@@ -75,10 +73,10 @@ async def get_type_industry(message: types.Message, state: FSMContext):
         await message.reply(
             'Напиши мне название фильма 🌞. Для большего процента успеха, советую написать максимально правильно🤔',
             reply_markup=ReplyKeyboardRemove())
-        await Choose_inf_of_title.film_name.set()
+        await Choose.film_name.set()
 
 
-@dp.message_handler(state=Choose_inf_of_title.film_name)
+@dp.message_handler(state=Choose.film_name)
 async def get_film_inf(message: types.Message, state: FSMContext):
     await state.update_data(film=message.text)
     await message.answer('Отлично👍, осуществляю поиск')
@@ -87,11 +85,11 @@ async def get_film_inf(message: types.Message, state: FSMContext):
     type_industry = data['type_industry']
     await state.finish()
     print('get name')
-    full_name, description, year, poster, rating, id_film = Films.get_film_information(film, type_industry)
+    full_name, description, year, poster, rating, id_film = Films().get_film_information(film, type_industry)
     if full_name == False:
         await message.reply('не удалось найти фильм', reply_markup=buttons)
     else:
-        button_like = InlineKeyboardButton('like', callback_data=f'buttonliked_{id_film}')
+        button_like = InlineKeyboardButton('like', callback_data=f'buttonlikedinf_{id_film}')
         buttons_inline = InlineKeyboardMarkup().add(button_like)
         await bot.send_photo(chat_id=message.chat.id, photo=InputFile('img.png'),
                              caption=f'🌟{full_name}🌟\n💥{description}💥\nгод - 🌜{year}🌛\n 📈рейтинг кинопоиска - {rating} 📈',
@@ -101,7 +99,7 @@ async def get_film_inf(message: types.Message, state: FSMContext):
     print(message.from_user.id)
 
 
-@dp.callback_query_handler(lambda callback_query: "buttonliked" in callback_query.data)
+@dp.callback_query_handler(lambda callback_query: "buttonlikedinf" in callback_query.data)
 async def process_callback_buttonlike(callback_query: types.CallbackQuery):
     await bot.send_message(chat_id=callback_query.from_user.id, text='Я добавил этот тайтл в понравившиеся :)')
     data = callback_query.data.split('_')[1]
@@ -109,14 +107,13 @@ async def process_callback_buttonlike(callback_query: types.CallbackQuery):
     if db_sess.query(UserToFilm).filter(
             UserToFilm.id == callback_query.from_user.id, UserToFilm.film_id == data).count() < 1:
         print('add new title in db')
+        user_to_film = UserToFilm()
         user_to_film.id = callback_query.from_user.id
         user_to_film.film_id = data
         db_sess.add(user_to_film)
         db_sess.commit()
-        db_sess.close()
-        print(1)
-    await callback_query.answer()
     db_sess.close()
+    await callback_query.answer()
 
 
 def register_handler_f1(dp: Dispatcher):

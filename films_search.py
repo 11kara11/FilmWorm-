@@ -5,10 +5,11 @@ import requests
 
 
 class Films():
+    URL = 'https://api.kinopoisk.dev/v1'
+    TOKEN = '&token=' + TOKEN_api_kinopoisk
+
     def __init__(self):
-        self.URL = 'https://api.kinopoisk.dev/v1'
         self.TITLE = '/movie?name=Человек паук нет пути домой&type=movie'
-        self.TOKEN = '&token=' + TOKEN_api_kinopoisk
 
     def get_film_information(self, name='', type_industry='movie'):
         try:
@@ -33,8 +34,36 @@ class Films():
             return (False, False, False, False, False, False)
         return (full_name, description, year, poster, rating, id_film)
 
-        #print(r.json())
+        # print(r.json())
 
-#Films().get_film_information()
-#r = requests.get('https://api.kinopoisk.dev/v1/movie/possible-values-by-field?field=genres.name'+'&token=' + TOKEN_api_kinopoisk)
-#print(r.json())
+    async def get_title_on_param(self, params=None, year=None, country=None):
+        # try:
+        print(year)
+        if year is None:
+            if country is None:
+                self.TITLE = f'/movie?'
+            else:
+                self.TITLE = f'/movie?countries.name={country}'
+        elif country is None:
+            self.TITLE = f'/movie?&year={year}'
+        else:
+            self.TITLE = f'/movie?year={year}&countries.name={country}'
+
+        print(params['genres.name'])
+        print(self.URL + self.TITLE + '&page=1&limit=50' + self.TOKEN)
+        print('params =     ', params)
+        r = requests.get(self.URL + self.TITLE + '&page=1&limit=50' + self.TOKEN, params=params)
+        # print(r.json())
+        return r.json()
+        # except Exception:
+        # return 1
+
+    async def get_film_on_id(self, id=None):
+        if id:
+            self.TITLE = f'/movie?id={id}'
+            r = requests.get(self.URL + self.TITLE + self.TOKEN)
+            #print(r.content)
+            return r.json()
+# Films().get_film_information()
+# r = requests.get('https://api.kinopoisk.dev/v1/movie/possible-values-by-field?field=genres.name'+'&token=' + TOKEN_api_kinopoisk)
+# print(r.json())
