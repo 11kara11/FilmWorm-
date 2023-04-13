@@ -9,27 +9,25 @@ class Films():
     TOKEN = '&token=' + TOKEN_api_kinopoisk
 
     def __init__(self):
-        self.TITLE = '/movie?name=Человек паук нет пути домой&type=movie'
+        self.TITLE = '/movie?'
 
     def get_film_information(self, name='', type_industry='movie'):
         try:
             self.TITLE = f'/movie?name={name}&type={type_industry}'
             r = requests.get(self.URL + self.TITLE + self.TOKEN)
-            with open('test.json', 'wb') as file:
-                file.write(r.content)
-            with open('test.json', 'r', encoding='utf-8') as file:
-                text_json = json.load(file)
-                full_name = text_json['docs'][0]['name']
-                description = text_json['docs'][0]['description']
-                year = text_json['docs'][0]['year']
-                id_film = text_json['docs'][0]['id']
-                poster_link = text_json['docs'][0]['poster']['url']
-                poster = requests.get(poster_link)
-                with open('img.png', 'wb') as photo:
-                    photo.write(poster.content)
 
-                rating = text_json['docs'][0]['rating']['kp']
-                print(full_name, '\n', description, '\n', year, '\n', poster, '\n', rating)
+            text_json = r.json()
+            full_name = text_json['docs'][0]['name']
+            description = text_json['docs'][0]['description']
+            year = text_json['docs'][0]['year']
+            id_film = text_json['docs'][0]['id']
+            poster_link = text_json['docs'][0]['poster']['url']
+            poster = requests.get(poster_link)
+            with open('img.png', 'wb') as photo:
+                photo.write(poster.content)
+
+            rating = text_json['docs'][0]['rating']['kp']
+            print(full_name, '\n', description, '\n', year, '\n', poster, '\n', rating)
         except Exception:
             return (False, False, False, False, False, False)
         return (full_name, description, year, poster, rating, id_film)
@@ -41,13 +39,17 @@ class Films():
         print(year)
         if year is None:
             if country is None:
-                self.TITLE = f'/movie?'
+                pass
             else:
-                self.TITLE = f'/movie?countries.name={country}'
+                params['countries.name'] = country
+                #self.TITLE = f'/movie?countries.name={country}'
         elif country is None:
-            self.TITLE = f'/movie?&year={year}'
+            params['year'] = year
+            #self.TITLE = f'/movie?&year={year}'
         else:
-            self.TITLE = f'/movie?year={year}&countries.name={country}'
+            params['countries.name'] = country
+            params['year'] = year
+            #self.TITLE = f'/movie?year={year}&countries.name={country}'
 
         print(params['genres.name'])
         print(self.URL + self.TITLE + '&page=1&limit=50' + self.TOKEN)
