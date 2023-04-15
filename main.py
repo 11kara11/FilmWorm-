@@ -7,6 +7,9 @@ from films_on_interest import register_handler_f3
 
 print('бот запущен')
 
+'''
+all handlers from modules are registered here. connect to the database and start the bot itself
+'''
 register_handler_f1(dp)
 register_handler_f2(dp)
 register_handler_f3(dp)

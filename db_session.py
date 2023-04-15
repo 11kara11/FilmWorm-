@@ -2,10 +2,13 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 from sqlalchemy.orm import Session, declarative_base
 
-
 SqlAlchemyBase = declarative_base()
 
 __factory = None
+'''
+create connection with data-base
+'''
+
 
 def global_init(db_file):
     global __factory
@@ -25,6 +28,7 @@ def global_init(db_file):
     import __all_models
 
     SqlAlchemyBase.metadata.create_all(engine)
+
 
 def create_session() -> Session:
     global __factory

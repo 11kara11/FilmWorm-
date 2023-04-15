@@ -11,6 +11,10 @@ class Films():
     def __init__(self):
         self.TITLE = '/movie?'
 
+    '''
+    this function provides movie data. takes as input the name of the movie and the type of movie industry
+    '''
+
     def get_film_information(self, name='', type_industry='movie'):
         try:
             self.TITLE = f'/movie?name={name}&type={type_industry}'
@@ -34,6 +38,10 @@ class Films():
 
         # print(r.json())
 
+    '''
+    the function provides data about the movie based on the obtained parameters such as year, country and genres
+    '''
+
     async def get_title_on_param(self, params=None, year=None, country=None):
         # try:
         print(year)
@@ -42,14 +50,14 @@ class Films():
                 pass
             else:
                 params['countries.name'] = country
-                #self.TITLE = f'/movie?countries.name={country}'
+                # self.TITLE = f'/movie?countries.name={country}'
         elif country is None:
             params['year'] = year
-            #self.TITLE = f'/movie?&year={year}'
+            # self.TITLE = f'/movie?&year={year}'
         else:
             params['countries.name'] = country
             params['year'] = year
-            #self.TITLE = f'/movie?year={year}&countries.name={country}'
+            # self.TITLE = f'/movie?year={year}&countries.name={country}'
 
         print(params['genres.name'])
         print(self.URL + self.TITLE + '&page=1&limit=50' + self.TOKEN)
@@ -60,11 +68,15 @@ class Films():
         # except Exception:
         # return 1
 
+    '''
+    this function returns information about the movie. receives an id as input
+    '''
+
     async def get_film_on_id(self, id=None):
         if id:
             self.TITLE = f'/movie?id={id}'
             r = requests.get(self.URL + self.TITLE + self.TOKEN)
-            #print(r.content)
+            # print(r.content)
             return r.json()
 # Films().get_film_information()
 # r = requests.get('https://api.kinopoisk.dev/v1/movie/possible-values-by-field?field=genres.name'+'&token=' + TOKEN_api_kinopoisk)

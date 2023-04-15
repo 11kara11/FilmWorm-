@@ -12,7 +12,6 @@ from usertofilm import UserToFilm
 import db_session
 import requests
 
-
 button_information_film = KeyboardButton('🧠Информация о тайтле🧠')
 button_rec_on_param = KeyboardButton('🍿тайтлы по параметрам🍿')
 button_rec_for_user = KeyboardButton('🎁тайтл по твоим интересам🎁')
@@ -49,6 +48,11 @@ genres = [
 
 button_skip = KeyboardButton('Пропустить')
 reply_button_skip = ReplyKeyboardMarkup(resize_keyboard=True).add(button_skip)
+
+'''
+handlers collect parameters such as year, country and genres, and then make a request to the API,
+inline buttons that switch movies are also implemented here
+'''
 
 
 class Choose(StatesGroup):
@@ -158,6 +162,13 @@ async def get_country(message: types.Message, state: FSMContext):
     # print(title_json)
 
 
+'''
+inline like button, creates a new session to the database and checks
+if there is a record where id user in telegram == id user in db and id liked film == id film in db ? 
+if yes, then it skips, if not, it creates a new record
+'''
+
+
 @dp.callback_query_handler(lambda callback_query: "buttonlikedparam" in callback_query.data)
 async def process_callback_buttonlike_param(callback_query: types.CallbackQuery):
     print('like')
@@ -172,8 +183,8 @@ async def process_callback_buttonlike_param(callback_query: types.CallbackQuery)
         user_to_film.film_id = data
         db_sess.add(user_to_film)
         db_sess.commit()
-        #db_sess.refresh(user_to_film)
-    #db_sess.expunge_all()
+        # db_sess.refresh(user_to_film)
+    # db_sess.expunge_all()
     db_sess.close()
     await callback_query.answer()
     print('enddddddddddddddddd')

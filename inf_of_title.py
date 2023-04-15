@@ -28,6 +28,11 @@ class Choose(StatesGroup):
     type_industry = State()
 
 
+'''
+these handlers get the type of industry and the name of the movie, and then contact the api to get the data
+'''
+
+
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
     user_id = message.from_user.id
@@ -97,6 +102,13 @@ async def get_film_inf(message: types.Message, state: FSMContext):
         await bot.send_message(chat_id=message.chat.id, text='если тебе понравился тайтл, ты можешь лайкнуть его :)',
                                reply_markup=buttons)
     print(message.from_user.id)
+
+
+'''
+inline like button, creates a new session to the database and checks
+if there is a record where id user in telegram == id user in db and id liked film == id film in db ? 
+if yes, then it skips, if not, it creates a new record
+'''
 
 
 @dp.callback_query_handler(lambda callback_query: "buttonlikedinf" in callback_query.data)

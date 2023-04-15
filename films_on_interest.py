@@ -13,15 +13,20 @@ import db_session
 import requests
 from collections import Counter
 
-
-user = User()
-user_to_film = UserToFilm()
+# user = User()
+# user_to_film = UserToFilm()
 
 button_information_film = KeyboardButton('🧠Информация о тайтле🧠')
 button_rec_on_param = KeyboardButton('🍿тайтлы по параметрам🍿')
 button_rec_for_user = KeyboardButton('🎁тайтл по твоим интересам🎁')
 buttons = ReplyKeyboardMarkup(resize_keyboard=True).row(button_information_film, button_rec_on_param)
 buttons.add(button_rec_for_user)
+
+'''
+checks if the user has 3 like movies, if yes, then establishes a connection with the database, takes the movie IDs, 
+makes requests to the api and gets the genres. 
+The 2 most common genres are selected and a request is made to the api with these genres
+'''
 
 
 @dp.message_handler(lambda message: '🎁тайтл по твоим интересам🎁' in message.text.lower())
@@ -35,7 +40,7 @@ async def reaction_buttons_f3(message: types.Message, state: FSMContext):
             liked_films = (db_sess.query(UserToFilm).filter_by(id=message.from_user.id).all())
             for i in liked_films:
                 title_json = await Films().get_film_on_id(i.film_id)
-                #print(title_json)
+                # print(title_json)
                 genres_list = title_json['docs'][0]['genres']
                 for genre in genres_list:
                     genres.append(genre['name'])
@@ -70,6 +75,14 @@ async def reaction_buttons_f3(message: types.Message, state: FSMContext):
         else:
             await message.reply('полайкай еще фильмов, ято бы я мог советовать на твой вкус')
 
+
+'''
+inline like button, creates a new session to the database and checks
+if there is a record where id user in telegram == id user in db and id liked film == id film in db ? 
+if yes, then it skips, if not, it creates a new record
+'''
+
+
 @dp.callback_query_handler(lambda callback_query: "buttonlikedinterest" in callback_query.data)
 async def process_callback_buttonlike_interest(callback_query: types.CallbackQuery):
     print('like')
@@ -84,11 +97,12 @@ async def process_callback_buttonlike_interest(callback_query: types.CallbackQue
         user_to_film.film_id = data
         db_sess.add(user_to_film)
         db_sess.commit()
-        #db_sess.refresh(user_to_film)
-    #db_sess.expunge_all()
+        # db_sess.refresh(user_to_film)
+    # db_sess.expunge_all()
     db_sess.close()
     await callback_query.answer()
     print('enddddddddddddddddd')
+
 
 '''
 @dp.callback_query_handler(lambda callback_query: "next" == callback_query.data)
@@ -154,6 +168,7 @@ async def process_callback_back(callback_query: types.CallbackQuery, state: FSMC
         await state.finish()
 
 '''
+
 
 def register_handler_f3(dp: Dispatcher):
     dp.register_message_handler(reaction_buttons_f3)
