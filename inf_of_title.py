@@ -37,7 +37,7 @@ these handlers get the type of industry and the name of the movie, and then cont
 async def process_start_command(message: types.Message):
     user_id = message.from_user.id
     print(user_id)
-    await message.reply(f"Привет!\n Я запомнил твой ID для дальнейшей работы!\n {message.from_user.id}",
+    await message.reply(f"Привет, {message.from_user.full_name}!\n Я запомнил твой ID для дальнейшей работы!\n",
                         reply_markup=buttons)
     db_sess = db_session.create_session()
     if db_sess.query(User).filter_by(id=message.from_user.id).count() < 1:
