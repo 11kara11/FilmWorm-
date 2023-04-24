@@ -38,16 +38,20 @@ async def reaction_buttons_f3(message: types.Message, state: FSMContext):
         if db_sess.query(UserToFilm).filter(UserToFilm.id == message.from_user.id).count() >= 3:
             await message.reply('ща порекомендую')
             liked_films = (db_sess.query(UserToFilm).filter_by(id=message.from_user.id).all())
-            for i in liked_films:
-                title_json = await Films().get_film_on_id(i.film_id)
-                # print(title_json)
-                genres_list = title_json['docs'][0]['genres']
-                for genre in genres_list:
-                    genres.append(genre['name'])
-            genre_count = Counter(genres)
-            tuple_top_genres = genre_count.most_common(2)
-            for genre, count in tuple_top_genres:
-                top_genres.append(genre)
+            try:
+                for i in liked_films:
+                    title_json = await Films().get_film_on_id(i.film_id)
+                    # print(title_json)
+                    genres_list = title_json['docs'][0]['genres']
+                    for genre in genres_list:
+                        genres.append(genre['name'])
+                genre_count = Counter(genres)
+                tuple_top_genres = genre_count.most_common(2)
+                for genre, count in tuple_top_genres:
+                    top_genres.append(genre)
+            except Exception:
+                await state.finish()
+                await message.reply('запросы кончились(', reply_markup=buttons)
             try:
                 title_json = await Films().get_title_on_param(params={'genres.name': top_genres})
                 full_name = title_json['docs'][0]['name']
