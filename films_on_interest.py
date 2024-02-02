@@ -77,7 +77,7 @@ async def reaction_buttons_f3(message: types.Message, state: FSMContext):
                 await state.finish()
                 await message.reply('не удалось найти тайтл', reply_markup=buttons)
         else:
-            await message.reply('полайкай еще фильмов, ято бы я мог советовать на твой вкус')
+            await message.reply('полайкай еще фильмов, что бы я мог советовать на твой вкус')
 
 
 '''

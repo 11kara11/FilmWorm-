@@ -108,13 +108,13 @@ async def get_genres(message: types.Message, state: FSMContext):
 async def get_year(message: types.Message, state: FSMContext):
     if message.text == 'Пропустить':
         await message.reply(
-            'напиши мне страну производства, старайся написать максимально праивльно, ты можешь пропустить этот пункт',
+            'напиши мне страну производства, старайся написать максимально правильно, ты можешь пропустить этот пункт',
             reply_markup=reply_button_skip)
         await state.update_data(year=None)
         await Choose.choose_country.set()
     elif str(message.text).isdigit():
         await message.reply(
-            'напиши мне страну производства, старайся написать максимально праивльно, ты можешь пропустить этот пункт',
+            'напиши мне страну производства, старайся написать максимально правильно, ты можешь пропустить этот пункт',
             reply_markup=reply_button_skip)
         await state.update_data(year=int(message.text))
         await Choose.choose_country.set()
